@@ -40,13 +40,6 @@
 					      <applicationName>demo-api-deployment</applicationName>
 					      <replicas>1</replicas>
 					      <vCores>0.1</vCores>
-					      <integration>
-					          <services>
-					              <objectStoreV2>
-					                   <enabled>true</enabled>
-					              </objectStoreV2>
-					          </services>
-					      </integration>
 						  <properties>
 					         <http.port>8081</http.port>
 					      </properties>
