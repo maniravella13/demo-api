@@ -3,34 +3,47 @@ name: Publish to Exchange & Deploy to CH2.0
 on:
   push:
     branches: [ main ]
-    
-jobs:         
+
+jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout this repo
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Cache dependencies
+      - name: Cache Maven dependencies
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven-
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
-      - name: Set up JDK 1.8
+      - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
-          distribution: "zulu"
-          java-version: 8
-      
-      - name: Publish to Exchange
+          distribution: zulu
+          java-version: 11
+
+      - name: Create Maven settings.xml
         run: |
-          mvn deploy --settings .maven/settings.xml -DskipMunitTests \
-          -Dclient.id="${{ secrets.CONNECTED_APP_CLIENT_ID }}" \
-          -Dclient.secret="${{ secrets.CONNECTED_APP_CLIENT_SECRET }}"
-      - name: Deploy to CloudHub 2.0
+          mkdir -p .maven
+          cat <<EOF > .maven/settings.xml
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+            <servers>
+              <server>
+                <id>anypoint-connected-app</id>
+                <username>${{ secrets.CONNECTED_APP_CLIENT_ID }}</username>
+                <password>${{ secrets.CONNECTED_APP_CLIENT_SECRET }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      - name: Build, Publish to Exchange & Deploy to CloudHub 2.0
         run: |
-          mvn deploy --settings .maven/settings.xml -DskipMunitTests -DmuleDeploy \
-          -Dclient.id="${{ secrets.CONNECTED_APP_CLIENT_ID }}" \
-          -Dclient.secret="${{ secrets.CONNECTED_APP_CLIENT_SECRET }}" 
+          mvn clean deploy \
+            --settings .maven/settings.xml \
+            -DskipMunitTests \
+            -DmuleDeploy
