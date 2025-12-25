@@ -13,7 +13,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <!-- desired Mule runtime -->
     <app.runtime>4.10.1</app.runtime>
     <mule.maven.plugin.version>4.6.1</mule.maven.plugin.version>
   </properties>
@@ -31,8 +30,6 @@
         <artifactId>mule-maven-plugin</artifactId>
         <version>${mule.maven.plugin.version}</version>
         <extensions>true</extensions>
-
-        <!-- IMPORTANT: muleVersion at top-level plugin configuration -->
         <configuration>
           <muleVersion>${app.runtime}</muleVersion>
 
@@ -42,7 +39,6 @@
             <environment>Sandbox</environment>
             <target>Cloudhub-US-East-2</target>
 
-            <!-- reference property rather than a literal -->
             <muleVersion>${app.runtime}</muleVersion>
 
             <server>anypoint-connected-app</server>
@@ -86,31 +82,25 @@
   </dependencies>
 
   <repositories>
-  <!-- add to <repositories> -->
-		<repository>
-		  <id>mulesoft-releases</id>
-		  <name>MuleSoft Releases</name>
-		  <url>https://repository.mulesoft.org/releases/</url>
-		  <layout>default</layout>
-		</repository>
-		
-		<!-- sometimes a second URL helps -->
-		<repository>
-		  <id>mulesoft-nexus-releases</id>
-		  <name>MuleSoft Nexus Releases</name>
-		  <url>https://repository.mulesoft.org/nexus/content/repositories/releases/</url>
-		  <layout>default</layout>
-		</repository>
     <repository>
       <id>anypoint-exchange-v3</id>
       <name>Anypoint Exchange</name>
       <url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
       <layout>default</layout>
     </repository>
+
+    <!-- Single mulesoft-releases entry only (duplicate removed) -->
     <repository>
       <id>mulesoft-releases</id>
-      <name>MuleSoft Releases Repository</name>
+      <name>MuleSoft Releases</name>
       <url>https://repository.mulesoft.org/releases/</url>
+      <layout>default</layout>
+    </repository>
+
+    <repository>
+      <id>mulesoft-nexus-releases</id>
+      <name>MuleSoft Nexus Releases</name>
+      <url>https://repository.mulesoft.org/nexus/content/repositories/releases/</url>
       <layout>default</layout>
     </repository>
   </repositories>
@@ -119,11 +109,15 @@
     <pluginRepository>
       <id>mulesoft-releases</id>
       <name>MuleSoft Releases Repository</name>
-      <layout>default</layout>
       <url>https://repository.mulesoft.org/releases/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
+      <layout>default</layout>
+    </pluginRepository>
+
+    <pluginRepository>
+      <id>mulesoft-nexus-releases</id>
+      <name>MuleSoft Nexus Releases</name>
+      <url>https://repository.mulesoft.org/nexus/content/repositories/releases/</url>
+      <layout>default</layout>
     </pluginRepository>
   </pluginRepositories>
 </project>
