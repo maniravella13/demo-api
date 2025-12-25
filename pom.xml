@@ -13,8 +13,8 @@
 				<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 				<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		
-				<mule.runtime.version>4.10.1</mule.runtime.version>
-				<mule.maven.plugin.version>4.2.1</mule.maven.plugin.version>
+				<app.runtime>4.10.1</app.runtime>
+				<mule.maven.plugin.version>4.6.1</mule.maven.plugin.version>
 			</properties>
 		
 			<build>
@@ -35,9 +35,9 @@
 					      <provider>MC</provider>
 					      <environment>Sandbox</environment>
 					      <target>Cloudhub-US-East-2</target>
-					      <muleVersion>${mule.runtime.version}</muleVersion>
+					      <muleVersion>4.10.1</muleVersion>
 					      <server>anypoint-connected-app</server>
-					      <applicationName>${project.artifactId}</applicationName>
+					      <applicationName>demo-api-deployment</applicationName>
 					      <replicas>1</replicas>
 					      <vCores>0.1</vCores>
 						  <properties>
@@ -76,9 +76,9 @@
 		
 			<repositories>
 				<repository>
-					<id>anypoint-exchange-v2</id>
+					<id>anypoint-exchange-v3</id>
 					<name>Anypoint Exchange</name>
-					<url>https://maven.anypoint.mulesoft.com/api/v2/maven</url>
+					<url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
 					<layout>default</layout>
 				</repository>
 				<repository>
@@ -101,5 +101,5 @@
 				</pluginRepository>
 			</pluginRepositories>
 		
-</project>
+		</project>
 		
