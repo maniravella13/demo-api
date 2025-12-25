@@ -34,35 +34,26 @@ jobs:
             <servers>
               <server>
                 <id>anypoint-connected-app</id>
-                <username>${env.MULE_USERNAME}</username>
-                <password>${env.MULE_PASSWORD}</password>
+                <username>${client.id}</username>
+                <password>${client.secret}</password>
               </server>
               <server>
                 <id>mulesoft-releases</id>
-                <username>${env.MULE_USERNAME}</username>
-                <password>${env.MULE_PASSWORD}</password>
+                <username>${client.id}</username>
+                <password>${client.secret}</password>
               </server>
             </servers>
           </settings>
           SETTINGS
         env:
-          MULE_USERNAME: ${{ secrets.MULE_USERNAME }}
-          MULE_PASSWORD: ${{ secrets.MULE_PASSWORD }}
+          MULE_USERNAME: ${{ secrets.client.id }}
+          MULE_PASSWORD: ${{ secrets.client.secret }}
 
       - name: Clear Mule local cache
         run: |
           echo "Removing Mule runtime artifacts from local Maven repo..."
           rm -rf ~/.m2/repository/com/mulesoft || true
           rm -rf ~/.m2/repository/org/mule || true
-
-      - name: Debug: check mule runtime POM URL (optional)
-        run: |
-          # Shows HTTP status for the runtime BOM POM (useful to identify 404/401/403)
-          curl -I "https://repository.mulesoft.org/releases/com/mulesoft/mule/distributions/mule-runtime-impl-no-services-bom/4.10.1/mule-runtime-impl-no-services-bom-4.10.1.pom" || true
-          # Try to fetch artifact directly (verbose) to help debug resolution issues
-          mvn org.apache.maven.plugins:maven-dependency-plugin:3.5.0:get \
-            -Dartifact=com.mulesoft.mule.distributions:mule-runtime-impl-no-services-bom:pom:4.10.1 \
-            -DremoteRepositories=https://repository.mulesoft.org/releases/ -X || true
 
       - name: Build (force refresh)
         run: |
