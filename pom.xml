@@ -86,6 +86,21 @@
   </dependencies>
 
   <repositories>
+  <!-- add to <repositories> -->
+		<repository>
+		  <id>mulesoft-releases</id>
+		  <name>MuleSoft Releases</name>
+		  <url>https://repository.mulesoft.org/releases/</url>
+		  <layout>default</layout>
+		</repository>
+		
+		<!-- sometimes a second URL helps -->
+		<repository>
+		  <id>mulesoft-nexus-releases</id>
+		  <name>MuleSoft Nexus Releases</name>
+		  <url>https://repository.mulesoft.org/nexus/content/repositories/releases/</url>
+		  <layout>default</layout>
+		</repository>
     <repository>
       <id>anypoint-exchange-v3</id>
       <name>Anypoint Exchange</name>
