@@ -3,7 +3,7 @@
 <server>
    <id>anypoint-connected-app</id>
    <username>~~~Client~~~</username>
-   <password>${CONNECTED_APP_CLIENT_ID}~?~${CONNECTED_APP_CLIENT_SECRET}</password>
+   <password>${client.id}~?~${client.secret}</password>
 </server>
 </servers>
 </settings>
