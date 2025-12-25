@@ -21,22 +21,63 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-         distribution: "zulu"
-         java-version: 17
+          distribution: "zulu"
+          java-version: 17
 
-      - name: Build
+      - name: Write Maven settings.xml (from secrets)
         run: |
-         mvn -B clean package --settings .maven/settings.xml -DskipMunitTests
-         -Dclient.id="${{ secrets.CONNECTED_APP_CLIENT_ID }}"
-         -Dclient.secret="${{ secrets.CONNECTED_APP_CLIENT_SECRET }}" -e -X
+          mkdir -p .maven
+          cat > .maven/settings.xml <<'SETTINGS'
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>anypoint-connected-app</id>
+                <username>${env.MULE_USERNAME}</username>
+                <password>${env.MULE_PASSWORD}</password>
+              </server>
+              <server>
+                <id>mulesoft-releases</id>
+                <username>${env.MULE_USERNAME}</username>
+                <password>${env.MULE_PASSWORD}</password>
+              </server>
+            </servers>
+          </settings>
+          SETTINGS
+        env:
+          MULE_USERNAME: ${{ secrets.MULE_USERNAME }}
+          MULE_PASSWORD: ${{ secrets.MULE_PASSWORD }}
 
-      - name: Publish to Exchange
+      - name: Clear Mule local cache
         run: |
-         mvn -B deploy --settings .maven/settings.xml -DskipMunitTests
-         -Dclient.id="${{ secrets.CONNECTED_APP_CLIENT_ID }}"
-         -Dclient.secret="${{ secrets.CONNECTED_APP_CLIENT_SECRET }}" -e -X
-      - name: Deploy to CloudHub 2.0
+          echo "Removing Mule runtime artifacts from local Maven repo..."
+          rm -rf ~/.m2/repository/com/mulesoft || true
+          rm -rf ~/.m2/repository/org/mule || true
+
+      - name: Debug: check mule runtime POM URL (optional)
         run: |
-         mvn -B deploy --settings .maven/settings.xml -DskipMunitTests -DmuleDeploy
-         -Dclient.id="${{ secrets.CONNECTED_APP_CLIENT_ID }}"
-         -Dclient.secret="${{ secrets.CONNECTED_APP_CLIENT_SECRET }}" -e -X
+          # Shows HTTP status for the runtime BOM POM (useful to identify 404/401/403)
+          curl -I "https://repository.mulesoft.org/releases/com/mulesoft/mule/distributions/mule-runtime-impl-no-services-bom/4.10.1/mule-runtime-impl-no-services-bom-4.10.1.pom" || true
+          # Try to fetch artifact directly (verbose) to help debug resolution issues
+          mvn org.apache.maven.plugins:maven-dependency-plugin:3.5.0:get \
+            -Dartifact=com.mulesoft.mule.distributions:mule-runtime-impl-no-services-bom:pom:4.10.1 \
+            -DremoteRepositories=https://repository.mulesoft.org/releases/ -X || true
+
+      - name: Build (force refresh)
+        run: |
+          mvn -U -B clean package --settings .maven/settings.xml -DskipMunitTests \
+            -Dclient.id="${{ secrets.CONNECTED_APP_CLIENT_ID }}" \
+            -Dclient.secret="${{ secrets.CONNECTED_APP_CLIENT_SECRET }}" -e -X
+
+      - name: Publish to Exchange (force refresh)
+        run: |
+          mvn -U -B deploy --settings .maven/settings.xml -DskipMunitTests \
+            -Dclient.id="${{ secrets.CONNECTED_APP_CLIENT_ID }}" \
+            -Dclient.secret="${{ secrets.CONNECTED_APP_CLIENT_SECRET }}" -e -X
+
+      - name: Deploy to CloudHub 2.0 (force refresh)
+        run: |
+          mvn -U -B deploy --settings .maven/settings.xml -DskipMunitTests -DmuleDeploy \
+            -Dclient.id="${{ secrets.CONNECTED_APP_CLIENT_ID }}" \
+            -Dclient.secret="${{ secrets.CONNECTED_APP_CLIENT_SECRET }}" -e -X

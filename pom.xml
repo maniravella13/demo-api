@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>7088bc54-caf8-4151-b3b3-ea28854e26af</groupId>
@@ -13,11 +15,65 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+    <!-- Mule runtime required by your mule-artifact.json -->
     <app.runtime>4.10.1</app.runtime>
+
+    <!-- Mule maven plugin version (keep or bump if needed) -->
     <mule.maven.plugin.version>4.6.1</mule.maven.plugin.version>
+
+    <!-- Ensure build uses Java 17 (matches mule-artifact.json) -->
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
   </properties>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <!-- Enforce mule-maven-plugin version/configuration centrally -->
+        <plugin>
+          <groupId>org.mule.tools.maven</groupId>
+          <artifactId>mule-maven-plugin</artifactId>
+          <version>${mule.maven.plugin.version}</version>
+          <extensions>true</extensions>
+          <configuration>
+            <!-- Important: set muleVersion at plugin top-level so the plugin uses correct runtime during build/validation -->
+            <muleVersion>${app.runtime}</muleVersion>
+
+            <cloudhub2Deployment>
+              <uri>https://anypoint.mulesoft.com</uri>
+              <provider>MC</provider>
+              <environment>Sandbox</environment>
+              <target>Cloudhub-US-East-2</target>
+
+              <!-- keep using property here as well -->
+              <muleVersion>${app.runtime}</muleVersion>
+
+              <server>anypoint-connected-app</server>
+              <applicationName>demo-api-deployment</applicationName>
+              <replicas>1</replicas>
+              <vCores>0.1</vCores>
+              <properties>
+                <http.port>8081</http.port>
+              </properties>
+              <secureProperties>
+                <https.port>8082</https.port>
+              </secureProperties>
+            </cloudhub2Deployment>
+          </configuration>
+        </plugin>
+
+        <!-- (Optional) configure maven-compiler to ensure Java 17 is used when compiling code -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.11.0</version>
+          <configuration>
+            <release>17</release>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -25,6 +81,7 @@
         <version>3.2.0</version>
       </plugin>
 
+      <!-- Use the plugin defined in pluginManagement -->
       <plugin>
         <groupId>org.mule.tools.maven</groupId>
         <artifactId>mule-maven-plugin</artifactId>
@@ -38,9 +95,7 @@
             <provider>MC</provider>
             <environment>Sandbox</environment>
             <target>Cloudhub-US-East-2</target>
-
             <muleVersion>${app.runtime}</muleVersion>
-
             <server>anypoint-connected-app</server>
             <applicationName>demo-api-deployment</applicationName>
             <replicas>1</replicas>
@@ -82,6 +137,7 @@
   </dependencies>
 
   <repositories>
+    <!-- Anypoint Exchange (private/public) -->
     <repository>
       <id>anypoint-exchange-v3</id>
       <name>Anypoint Exchange</name>
@@ -89,7 +145,7 @@
       <layout>default</layout>
     </repository>
 
-    <!-- Single mulesoft-releases entry only (duplicate removed) -->
+    <!-- MuleSoft central releases (runtime BOMs) -->
     <repository>
       <id>mulesoft-releases</id>
       <name>MuleSoft Releases</name>
@@ -97,6 +153,7 @@
       <layout>default</layout>
     </repository>
 
+    <!-- Alternate Nexus path (keeps id unique) -->
     <repository>
       <id>mulesoft-nexus-releases</id>
       <name>MuleSoft Nexus Releases</name>
@@ -117,6 +174,13 @@
       <id>mulesoft-nexus-releases</id>
       <name>MuleSoft Nexus Releases</name>
       <url>https://repository.mulesoft.org/nexus/content/repositories/releases/</url>
+      <layout>default</layout>
+    </pluginRepository>
+
+    <pluginRepository>
+      <id>anypoint-exchange-v3-plugins</id>
+      <name>Anypoint Exchange plugins</name>
+      <url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
       <layout>default</layout>
     </pluginRepository>
   </pluginRepositories>
